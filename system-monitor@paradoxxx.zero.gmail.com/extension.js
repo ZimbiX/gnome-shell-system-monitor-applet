@@ -2372,6 +2372,121 @@ const Gpu = class SystemMonitor_Gpu extends ElementBase {
     }
 }
 
+const Solar = class SystemMonitor_Solar extends ElementBase {
+    constructor() {
+        super({
+            elt: 'solar',
+            item_name: _('Solar'),
+            color_name: ['production', 'total-consumption', 'net-consumption']
+        });
+        this.max = 5000;
+        this.item_name = _('Solar');
+
+        this.production = 0;
+        this.totalConsumption = 0;
+        this.netConsumption = 0;
+        this.tip_format(['W', 'W', 'W']);
+        this.update();
+    }
+    refresh() {
+        // Run asynchronously, to avoid shell freeze
+        try {
+            let path = Me.dir.get_path();
+            let script = ['tail', '-4', '/home/brendan/envoy.csv'];
+
+            // Create subprocess and capture STDOUT
+            let proc = new Gio.Subprocess({argv: script, flags: Gio.SubprocessFlags.STDOUT_PIPE});
+            proc.init(null);
+            // Asynchronously call the output handler when script output is ready
+            proc.communicate_utf8_async(null, null, Lang.bind(this, this._handleOutput));
+        } catch (err) {
+            global.logError(err.message);
+        }
+    }
+    _handleOutput(proc, result) {
+        let [ok, output, ] = proc.communicate_utf8_finish(result);
+        if (ok) {
+            this._readPowerReadingsFromCSVTail(output);
+        } else {
+            global.logError('Failed to run shell command to collect latest solar readings');
+        }
+    }
+    _sanitizeUsageValue(val) {
+        val = parseFloat(val);
+        if (isNaN(val)) {
+            val = 0
+        }
+        return val;
+    }
+    _readPowerReadingsFromCSVTail(csvTailProcOutput) {
+        const readings = Object.fromEntries(
+            csvTailProcOutput
+                .split('\n')
+                .map(line => {
+                    let [name, , valueText] = line.split(',');
+                    return [name, this._sanitizeUsageValue(valueText)];
+                })
+        );
+        this.production = Math.round(readings['eim']);
+        this.totalConsumption = Math.round(readings['total-consumption']);
+        this.netConsumption = Math.round(readings['net-consumption']);
+    }
+    _apply() {
+        this.vals = [
+            this.production,
+            this.totalConsumption,
+            this.netConsumption,
+        ];
+        this.tip_vals = [
+            this.production.toLocaleString(Locale),
+            this.totalConsumption.toLocaleString(Locale),
+            this.netConsumption.toLocaleString(Locale),
+        ];
+        this.menu_items[0].text = this.tip_vals[0];
+        this.menu_items[2].text = this.tip_vals[1];
+        this.menu_items[4].text = this.tip_vals[2];
+    }
+    create_text_items() {
+        return [
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-status-value'),
+                y_align: Clutter.ActorAlign.CENTER}),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-status-value'),
+                y_align: Clutter.ActorAlign.CENTER}),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-status-value'),
+                y_align: Clutter.ActorAlign.CENTER}),
+        ];
+    }
+    create_menu_items() {
+        let unit = _('W');
+        return [
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-value')}),
+            new St.Label({
+                text: unit,
+                style_class: Style.get('sm-label')}),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-value')}),
+            new St.Label({
+                text: unit,
+                style_class: Style.get('sm-label')}),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-value')}),
+            new St.Label({
+                text: unit,
+                style_class: Style.get('sm-label')}),
+        ];
+    }
+}
+
 const Icon = class SystemMonitor_Icon {
     constructor() {
         this.actor = new St.Icon({
@@ -2470,6 +2585,7 @@ function enable() {
         positionList[Schema.get_int('thermal-position')] = new Thermal();
         positionList[Schema.get_int('fan-position')] = new Fan();
         positionList[Schema.get_int('battery-position')] = new Battery();
+        positionList[Schema.get_int('solar-position')] = new Solar();
 
         for (let i = 0; i < Object.keys(positionList).length; i++) {
             if (i === cpuPosition) {

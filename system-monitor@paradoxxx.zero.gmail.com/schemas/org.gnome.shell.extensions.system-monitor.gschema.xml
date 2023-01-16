@@ -414,6 +414,47 @@
       <default>'#00ff82'</default>
       <summary>Color of program GPU memory in the chart</summary>
     </key>
+    <key name="solar-production-color" type="s">
+      <default>'#ff0000'</default>
+      <summary>Color of solar production power in the chart</summary>
+    </key>
+    <key name="solar-total-consumption-color" type="s">
+      <default>'#00ff00'</default>
+      <summary>Color of site total consumption power in the chart</summary>
+    </key>
+    <key name="solar-net-consumption-color" type="s">
+      <default>'#0000ff'</default>
+      <summary>Color of site net consumption power in the chart</summary>
+    </key>
+    <key name="solar-display" type="b">
+      <default>true</default>
+      <summary>Display solar</summary>
+      <description>Set to false to remove solar display in status bar</description>
+    </key>
+    <key name="solar-refresh-time" type="i">
+      <default>5000</default>
+      <summary>Solar refresh time</summary>
+      <description>Time in ms between refresh of solar</description>
+    </key>
+    <key name="solar-graph-width" type="i">
+      <default>100</default>
+      <summary>Solar graph width</summary>
+      <description>Graph width in pixels</description>
+    </key>
+    <key name="solar-show-text" type="b">
+      <default>false</default>
+      <summary>Display 'solar'</summary>
+      <description>Set to true to show 'solar' before solar display</description>
+    </key>
+    <key name="solar-show-menu" type="b">
+      <default>true</default>
+      <summary>Display solar values in menu</summary>
+      <description>Set to true to show solar in pop-up menu</description>
+    </key>
+    <key name="solar-style" enum="org.gnome.shell.extensions.system-monitor.display-style">
+      <default>'graph'</default>
+      <summary>Choose the display style.</summary>
+    </key>
     <key name="thermal-tz0-color" type="s">
       <default>'#f2002e'</default>
       <summary>Color of user thermal in the chart</summary>
@@ -507,6 +548,10 @@
   <key name="battery-position" type="i">
     <default>9</default>
     <summary>Position in which to display the battery display</summary>
+  </key>
+  <key name="solar-position" type="i">
+    <default>10</default>
+    <summary>Position in which to display the solar display</summary>
   </key>
 
   </schema>

@@ -460,7 +460,7 @@ const SettingFrame = class SystemMonitor {
 
 const App = class SystemMonitor_App {
     constructor() {
-        let setting_names = ['cpu', 'memory', 'swap', 'net', 'disk', 'gpu', 'thermal', 'fan', 'freq', 'battery'];
+        let setting_names = ['cpu', 'memory', 'swap', 'net', 'disk', 'gpu', 'thermal', 'fan', 'freq', 'battery', 'solar'];
         let ordered_items = {};
         let setting_items = [];
         // Get preferred position of the tabs
