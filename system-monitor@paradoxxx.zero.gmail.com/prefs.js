@@ -374,7 +374,8 @@ const SettingFrame = class SystemMonitor {
             // Schema.bind(key, item.selector, 'active', Gio.SettingsBindFlags.DEFAULT);
         // hbox2
         } else if (config.match(/-color$/)) {
-            let item = new ColorSelect(_(config.split('-')[0].capitalize()));
+            const configTitle = config.replace(/-color$/, '').replaceAll('-', ' ').capitalize();
+            let item = new ColorSelect(_(configTitle));
             item.set_value(this.schema.get_string(key));
             if (shellMajorVersion < 40) {
                 this.hbox2.pack_end(item.actor, true, false, 0);
