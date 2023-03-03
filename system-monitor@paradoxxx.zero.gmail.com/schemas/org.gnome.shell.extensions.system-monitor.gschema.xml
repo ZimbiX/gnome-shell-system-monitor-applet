@@ -414,9 +414,13 @@
       <default>'#00ff82'</default>
       <summary>Color of program GPU memory in the chart</summary>
     </key>
-    <key name="power-power-color" type="s">
+    <key name="power-power-charging-color" type="s">
       <default>'#f6d32d'</default>
-      <summary>Color of battery power in the chart</summary>
+      <summary>Color of battery power in the chart when charging</summary>
+    </key>
+    <key name="power-power-discharging-color" type="s">
+      <default>'#f6892d'</default>
+      <summary>Color of battery power in the chart when discharging</summary>
     </key>
     <key name="power-energy-color" type="s">
       <default>'#dc8add'</default>

@@ -2354,12 +2354,13 @@ const Gpu = class SystemMonitor_Gpu extends ElementBase {
     }
 }
 
+// TODO: Combine with Battery graph?
 const Power = class SystemMonitor_Power extends ElementBase {
     constructor() {
         super({
             elt: 'power',
             item_name: _('Power'),
-            color_name: ['power', 'energy']
+            color_name: ['power-charging', 'power-discharging', 'energy']
         });
         this.max = 100;
         this.maxPowerW = Schema.get_int('power-max-power-w');
@@ -2372,7 +2373,7 @@ const Power = class SystemMonitor_Power extends ElementBase {
         this.energyWh = 0;
         this.maxEnergyWh = 0;
         this.chargingState = 'Unknown';
-        this.tip_format(['', '']);
+        this.tip_format(['', '', '']);
         this.update();
     }
     refresh() {
@@ -2396,9 +2397,11 @@ const Power = class SystemMonitor_Power extends ElementBase {
     _apply() {
         const powerPercentage = Math.min(100, (this.powerW / this.maxPowerW) * 100);
         const energyPercentage = (this.energyWh / this.maxEnergyWh) * 100;
+        const isCharging = this.chargingState === 'Charging';
 
         this.vals = [
-            Math.round(powerPercentage),
+            isCharging ? powerPercentage : 0,
+            !isCharging ? powerPercentage : 0,
             Math.round(energyPercentage - powerPercentage), // Subtracted in order to counter graph accumulation
         ];
 
@@ -2407,7 +2410,8 @@ const Power = class SystemMonitor_Power extends ElementBase {
         const energyText = `${this.energyWh.toLocaleString(Locale)} / ${this.maxEnergyWh.toLocaleString(Locale)}`;
 
         this.tip_vals = [
-            `${powerText} W (${this.chargingState})`,
+            `${isCharging ? powerText : '0'} W`,
+            `${!isCharging ? powerText : '0'} W`,
             `${energyText} Wh`,
         ].map(text => text.replaceAll(' ', '   '));
 
