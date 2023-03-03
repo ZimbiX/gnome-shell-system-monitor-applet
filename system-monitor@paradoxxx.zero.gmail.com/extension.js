@@ -2267,18 +2267,11 @@ const Gpu = class SystemMonitor_Gpu extends ElementBase {
             global.logError('gpu_usage.sh invocation failed');
         }
     }
-    _sanitizeUsageValue(val) {
-        val = parseInt(val);
-        if (isNaN(val)) {
-            val = 0
-        }
-        return val;
-    }
     _readTemperature(procOutput) {
         let usage = procOutput.split('\n');
-        let memTotal = this._sanitizeUsageValue(usage[0]);
-        let memUsed = this._sanitizeUsageValue(usage[1]);
-        this.percentage = this._sanitizeUsageValue(usage[2]);
+        let memTotal = sanitizeInt(usage[0]);
+        let memUsed = sanitizeInt(usage[1]);
+        this.percentage = sanitizeInt(usage[2]);
         if (typeof this.useGiB === 'undefined') {
             this._unit(memTotal);
             this._update_unit();
@@ -2373,6 +2366,13 @@ const Gpu = class SystemMonitor_Gpu extends ElementBase {
     }
 }
 
+const sanitizeNumber = (val, parseFn, defaultVal) => {
+    val = parseFn(val);
+    return isNaN(val) ? defaultVal : val
+}
+const sanitizeInt = (val, defaultVal = 0) => sanitizeNumber(val, parseInt, defaultVal)
+const sanitizeFloat = (val, defaultVal = 0) => sanitizeNumber(val, parseFloat, defaultVal)
+
 const Solar = class SystemMonitor_Solar extends ElementBase {
     constructor() {
         super({
@@ -2412,20 +2412,13 @@ const Solar = class SystemMonitor_Solar extends ElementBase {
             global.logError('Failed to run shell command to collect latest solar readings');
         }
     }
-    _sanitizeUsageValue(val) {
-        val = parseFloat(val);
-        if (isNaN(val)) {
-            val = 0
-        }
-        return val;
-    }
     _readPowerReadingsFromCSVTail(csvTailProcOutput) {
         const readings = Object.fromEntries(
             csvTailProcOutput
                 .split('\n')
                 .map(line => {
                     let [name, , valueText] = line.split(',');
-                    return [name, this._sanitizeUsageValue(valueText)];
+                    return [name, sanitizeFloat(valueText)];
                 })
         );
         this.production = Math.round(readings['eim']);
