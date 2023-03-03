@@ -451,6 +451,11 @@
       <default>'graph'</default>
       <summary>Choose the display style.</summary>
     </key>
+    <key name="power-max-power-w" type="i">
+      <default>50</default>
+      <summary>Graph max power (W)</summary>
+      <description>Anticipated maximum rate of charge/discharge in Watts - sets the scale of the graph</description>
+    </key>
     <key name="solar-production-color" type="s">
       <default>'#ff0000'</default>
       <summary>Color of solar production power in the chart</summary>

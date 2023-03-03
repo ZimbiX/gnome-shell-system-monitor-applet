@@ -453,6 +453,11 @@ const SettingFrame = class SystemMonitor {
             item.set_args(0, 300, 5, 5);
             this.hbox3.add(item.actor);
             Schema.bind(key, item.spin, 'value', Gio.SettingsBindFlags.DEFAULT);
+        } else if (config === 'max-power-w') {
+            let item = new IntSelect(_('Graph max power (W)'));
+            item.set_args(0, 100000, 1, 10);
+            this.hbox3.add(item.actor);
+            Schema.bind(key, item.spin, 'value', Gio.SettingsBindFlags.DEFAULT);
         }
         this._reorder();
     }

@@ -2362,7 +2362,10 @@ const Power = class SystemMonitor_Power extends ElementBase {
             color_name: ['power', 'energy']
         });
         this.max = 100;
-        this.maxPowerW = 50; // TODO: Turn this arbitrary value into a setting
+        this.maxPowerW = Schema.get_int('power-max-power-w');
+        Schema.connect('changed::' + this.elt + '-max-power-w', (schema, key) => {
+            this.maxPowerW = Schema.get_int(key);
+        });
         this.item_name = _('Power');
 
         this.powerW = 0;
