@@ -2402,7 +2402,8 @@ const Power = class SystemMonitor_Power extends ElementBase {
             Math.round(energyPercentage - powerPercentage), // Subtracted in order to counter graph accumulation
         ];
 
-        const powerText = this.powerW.toLocaleString(Locale);
+        const powerWRoundedTo1dp = Math.round(this.powerW * 10) / 10;
+        const powerText = powerWRoundedTo1dp.toLocaleString(Locale);
         const energyText = `${this.energyWh.toLocaleString(Locale)} / ${this.maxEnergyWh.toLocaleString(Locale)}`;
 
         this.tip_vals = [
