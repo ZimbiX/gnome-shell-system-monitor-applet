@@ -2354,6 +2354,117 @@ const Gpu = class SystemMonitor_Gpu extends ElementBase {
     }
 }
 
+const Power = class SystemMonitor_Power extends ElementBase {
+    constructor() {
+        super({
+            elt: 'power',
+            item_name: _('Power'),
+            color_name: ['power', 'energy']
+        });
+        this.max = 100;
+        this.maxPowerW = 50; // TODO: Turn this arbitrary value into a setting
+        this.item_name = _('Power');
+
+        this.powerW = 0;
+        this.energyWh = 0;
+        this.maxEnergyWh = 0;
+        this.chargingState = 'Unknown';
+        this.tip_format(['', '']);
+        this.update();
+    }
+    refresh() {
+        runCommandAndHandleOutputAsync(['cat', '/sys/class/power_supply/BAT0/uevent'], this._handleOutput.bind(this))
+    }
+    _handleOutput(proc, result) {
+        let [ok, output, ] = proc.communicate_utf8_finish(result);
+        if (ok) {
+            this._parseAndSetValuesFromEnvFormattedString(output);
+        } else {
+            global.logError('Failed to run shell command to collect latest battery power readings');
+        }
+    }
+    _parseAndSetValuesFromEnvFormattedString(envFormattedString) {
+        const rawValuesMapping = rawValuesMappingFromKeyValueLines(envFormattedString, '=')
+        this.powerW = sanitizeInt(rawValuesMapping['POWER_SUPPLY_POWER_NOW']) / 1000000
+        this.energyWh = sanitizeInt(rawValuesMapping['POWER_SUPPLY_ENERGY_NOW']) / 1000000
+        this.maxEnergyWh = sanitizeInt(rawValuesMapping['POWER_SUPPLY_ENERGY_FULL']) / 1000000
+        this.chargingState = rawValuesMapping['POWER_SUPPLY_STATUS'] || 'Unknown'
+    }
+    _apply() {
+        const powerPercentage = Math.min(100, (this.powerW / this.maxPowerW) * 100);
+        const energyPercentage = (this.energyWh / this.maxEnergyWh) * 100;
+
+        this.vals = [
+            Math.round(powerPercentage),
+            Math.round(energyPercentage - powerPercentage), // Subtracted in order to counter graph accumulation
+        ];
+
+        const powerText = this.powerW.toLocaleString(Locale);
+        const energyText = `${this.energyWh.toLocaleString(Locale)} / ${this.maxEnergyWh.toLocaleString(Locale)}`;
+
+        this.tip_vals = [
+            `${powerText} W (${this.chargingState})`,
+            `${energyText} Wh`,
+        ].map(text => text.replaceAll(' ', '   '));
+
+        [
+            powerText, `W`, `(${this.chargingState})`,
+            energyText, 'Wh',
+        ].forEach((menuItemText, i) => {
+            this.menu_items[i].text = menuItemText;
+        });
+    }
+    create_text_items() {
+        return [
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-status-value'),
+            }),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-status-value'),
+            }),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-status-value'),
+            }),
+        ];
+    }
+    create_menu_items() {
+        return [
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-value'),
+            }),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-label'),
+            }),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-label'),
+            }),
+
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-value'),
+            }),
+            new St.Label({
+                text: '',
+                style_class: Style.get('sm-label'),
+            }),
+        ];
+    }
+}
+
+const rawValuesMappingFromKeyValueLines = (linesString, keyValueDelimiter) => (
+    Object.fromEntries(
+        linesString
+            .split('\n')
+            .map(line => line.split(keyValueDelimiter))
+    )
+)
+
 const sanitizeNumber = (val, parseFn, defaultVal) => {
     val = parseFn(val);
     return isNaN(val) ? defaultVal : val
@@ -2568,6 +2679,7 @@ function enable() {
         positionList[Schema.get_int('thermal-position')] = new Thermal();
         positionList[Schema.get_int('fan-position')] = new Fan();
         positionList[Schema.get_int('battery-position')] = new Battery();
+        positionList[Schema.get_int('power-position')] = new Power();
         positionList[Schema.get_int('solar-position')] = new Solar();
 
         for (let i = 0; i < Object.keys(positionList).length; i++) {

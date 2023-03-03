@@ -414,6 +414,43 @@
       <default>'#00ff82'</default>
       <summary>Color of program GPU memory in the chart</summary>
     </key>
+    <key name="power-power-color" type="s">
+      <default>'#f6d32d'</default>
+      <summary>Color of battery power in the chart</summary>
+    </key>
+    <key name="power-energy-color" type="s">
+      <default>'#dc8add'</default>
+      <summary>Color of battery energy in the chart</summary>
+    </key>
+    <key name="power-display" type="b">
+      <default>true</default>
+      <summary>Display power</summary>
+      <description>Set to false to remove power display in status bar</description>
+    </key>
+    <key name="power-refresh-time" type="i">
+      <default>5000</default>
+      <summary>Power refresh time</summary>
+      <description>Time in ms between refresh of power</description>
+    </key>
+    <key name="power-graph-width" type="i">
+      <default>100</default>
+      <summary>Power graph width</summary>
+      <description>Graph width in pixels</description>
+    </key>
+    <key name="power-show-text" type="b">
+      <default>false</default>
+      <summary>Display 'power'</summary>
+      <description>Set to true to show 'power' before power display</description>
+    </key>
+    <key name="power-show-menu" type="b">
+      <default>true</default>
+      <summary>Display power values in menu</summary>
+      <description>Set to true to show power in pop-up menu</description>
+    </key>
+    <key name="power-style" enum="org.gnome.shell.extensions.system-monitor.display-style">
+      <default>'graph'</default>
+      <summary>Choose the display style.</summary>
+    </key>
     <key name="solar-production-color" type="s">
       <default>'#ff0000'</default>
       <summary>Color of solar production power in the chart</summary>
@@ -549,8 +586,12 @@
     <default>9</default>
     <summary>Position in which to display the battery display</summary>
   </key>
-  <key name="solar-position" type="i">
+  <key name="power-position" type="i">
     <default>10</default>
+    <summary>Position in which to display the power display</summary>
+  </key>
+  <key name="solar-position" type="i">
+    <default>11</default>
     <summary>Position in which to display the solar display</summary>
   </key>
 
