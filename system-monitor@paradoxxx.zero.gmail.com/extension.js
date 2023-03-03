@@ -2245,19 +2245,7 @@ const Gpu = class SystemMonitor_Gpu extends ElementBase {
         }
     }
     refresh() {
-        // Run asynchronously, to avoid shell freeze
-        try {
-            let path = Me.dir.get_path();
-            let script = ['/bin/bash', path + '/gpu_usage.sh'];
-
-            // Create subprocess and capture STDOUT
-            let proc = new Gio.Subprocess({argv: script, flags: Gio.SubprocessFlags.STDOUT_PIPE});
-            proc.init(null);
-            // Asynchronously call the output handler when script output is ready
-            proc.communicate_utf8_async(null, null, Lang.bind(this, this._handleOutput));
-        } catch (err) {
-            global.logError(err.message);
-        }
+        runCommandAndHandleOutputAsync(['/bin/bash', Me.dir.get_path() + '/gpu_usage.sh'], this._handleOutput.bind(this))
     }
     _handleOutput(proc, result) {
         let [ok, output, ] = proc.communicate_utf8_finish(result);
@@ -2373,6 +2361,19 @@ const sanitizeNumber = (val, parseFn, defaultVal) => {
 const sanitizeInt = (val, defaultVal = 0) => sanitizeNumber(val, parseInt, defaultVal)
 const sanitizeFloat = (val, defaultVal = 0) => sanitizeNumber(val, parseFloat, defaultVal)
 
+// For running a command asynchronously in refresh() to avoid freezing Gnome Shell
+const runCommandAndHandleOutputAsync = (commandAsArray, handleOutputFn) => {
+    try {
+        // Create subprocess and capture STDOUT
+        let proc = new Gio.Subprocess({argv: commandAsArray, flags: Gio.SubprocessFlags.STDOUT_PIPE});
+        proc.init(null);
+        // Asynchronously call the output handler when command output is ready
+        proc.communicate_utf8_async(null, null, Lang.bind(this, handleOutputFn));
+    } catch (err) {
+        global.logError(err.message);
+    }
+}
+
 const Solar = class SystemMonitor_Solar extends ElementBase {
     constructor() {
         super({
@@ -2390,19 +2391,7 @@ const Solar = class SystemMonitor_Solar extends ElementBase {
         this.update();
     }
     refresh() {
-        // Run asynchronously, to avoid shell freeze
-        try {
-            let path = Me.dir.get_path();
-            let script = ['tail', '-4', '/home/brendan/envoy.csv'];
-
-            // Create subprocess and capture STDOUT
-            let proc = new Gio.Subprocess({argv: script, flags: Gio.SubprocessFlags.STDOUT_PIPE});
-            proc.init(null);
-            // Asynchronously call the output handler when script output is ready
-            proc.communicate_utf8_async(null, null, Lang.bind(this, this._handleOutput));
-        } catch (err) {
-            global.logError(err.message);
-        }
+        runCommandAndHandleOutputAsync(['tail', '-4', '/home/brendan/envoy.csv'], this._handleOutput.bind(this))
     }
     _handleOutput(proc, result) {
         let [ok, output, ] = proc.communicate_utf8_finish(result);
